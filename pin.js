@@ -19,10 +19,10 @@ function PinPi(pin, usage) {
 
     return {
         read: function () {
-            return gpio.read(pin) === rpio.HIGH;
+            return rpio.read(pin) === rpio.HIGH;
         },
         write: function (value) {
-            gpio.write(pin, value ? rpio.HIGH : rpio.LOW);
+            rpio.write(pin, value ? rpio.HIGH : rpio.LOW);
         },
         close: function () {
             rpio.close(pin);
