@@ -1,14 +1,14 @@
 {
-    "name": "Chef",
-    "version": "1.0.0",
-    "description": "bot.js",
-    "main": "server.js",
-    "author": {
-        "name": "fr8tra1n"
-    },
-    "dependencies": {
-        "node-telegram-bot-api": "^0.24.0",
-        "pi-gpio": "0.0.8",
-        "pretty-date": "^0.2.0"
-    }
+  "name": "Chef",
+  "version": "1.0.0",
+  "description": "bot.js",
+  "main": "server.js",
+  "author": {
+    "name": "fr8tra1n"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.24.0",
+    "pretty-date": "^0.2.0",
+    "rpio": "^0.9.12"
+  }
 }

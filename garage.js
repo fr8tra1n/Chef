@@ -28,39 +28,35 @@ var Garage = function (config) {
         //todo
     }
 
-    function update(fnDone) {
-        statusPin.read(function (value, err) {
-            //apply
-            isGarageOpen = !value;
-            //console.log('garage status: ' + value);
-            if (isGarageOpen) {
-                openCycles++;
-                if (!garageOpened) {
-                    //opened just now
-                    garageOpened = reminded = new Date();
-                    openCycles = 0;
+    function update() {
+        isGarageOpen = !statusPin.read();
+        //console.log('garage status: ' + value);
+        if (isGarageOpen) {
+            openCycles++;
+            if (!garageOpened) {
+                //opened just now
+                garageOpened = reminded = new Date();
+                openCycles = 0;
+            }
+            else {
+                if (openCycles === 1 && onOpen) {
+                    //compensate short surge induced false positive
+                    onOpen(isInitial);
+                    isInitial = false;
                 }
-                else {
-                    if (openCycles === 1 && onOpen) {
-                        //compensate short surge induced false positive
-                        onOpen(isInitial);
-                        isInitial = false;
-                    }
-                    if (onOpenReminder) {
-                        //already open
-                        if (new Date() - reminded > reminderInterval) {
-                            onOpenReminder(garageOpened);
-                            reminded = new Date();
-                        }
+                if (onOpenReminder) {
+                    //already open
+                    if (new Date() - reminded > reminderInterval) {
+                        onOpenReminder(garageOpened);
+                        reminded = new Date();
                     }
                 }
             }
-            else if (garageOpened && onClose) {
-                //closed just now
-                onClose();
-            }
-            fnDone();
-        });
+        }
+        else if (garageOpened && onClose) {
+            //closed just now
+            onClose();
+        }
     }
 
     function start() {
@@ -68,9 +64,8 @@ var Garage = function (config) {
         setInterval(function () {
             if (!isBusy) {
                 isBusy = true;
-                update(function () {
-                    isBusy = false;
-                });
+                update();
+                isBusy = false;
             }
         }, 150);
     }

@@ -10,36 +10,31 @@ var Pin = function (config) {
 };
 
 function PinPi(pin, usage) {
-    var gpio = require("pi-gpio"),
-        isReady = false;
-    gpio.open(pin, usage, function () {
-        isReady = true;
-    });
+    var rpio = require("rpio"),
+        option = usage === 'input' ? rpio.INPUT :
+            usage === 'output' ? rpio.INPUT :
+                rpio.INPUT;
+
+    rpio.open(pin, option);
 
     return {
-        read: function (fn) {
-            gpio.read(pin, function (err, value) {
-                fn(value, err);
-            });
+        read: function () {
+            return gpio.read(pin) === rpio.HIGH;
         },
-        write: function (value, fn) {
-            gpio.write(pin, value, function (err) {
-                fn(err);
-            });
+        write: function (value) {
+            gpio.write(pin, value ? rpio.HIGH : rpio.LOW);
         },
         close: function () {
-            gpio.close(pin);
+            rpio.close(pin);
         }
     };
 }
 
 function PinEmulated(pin, usage) {
     return {
-        read: function (fn) {
-            fn(0);
+        read: function () {
         },
-        write: function (value, fn) {
-            fn();
+        write: function (value) {
         },
         close: function () {
         }
