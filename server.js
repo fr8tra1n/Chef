@@ -9,6 +9,27 @@ var http = require('http'),
     Security = require('./security.js'),
     Broadcast = require('./broadcast.js');
 
+var garageStatusPin;
+
+//setup exit handler
+function exitHandler(options, err) {
+    //clean up
+    if (garageStatusPin) {
+        garageStatusPin.close();
+    }
+
+    if (options.cleanup) console.log('clean');
+    if (err) console.log(err.stack);
+    if (options.exit) process.exit();
+}
+//do something when app is closing
+process.on('exit', exitHandler.bind(null, { cleanup: true }));
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, { exit: true }));
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
+
+//init
 var port = process.env.port || config.port || 1337;
 http.createServer(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -23,8 +44,8 @@ var bot = new TelegramBot(config.telegramToken, { polling: true }),
 broadcast.message('Vurt da Furk! Bork Bork Bork');
 
 //setup gpio
-var pin = new Pin(config),
-    garageStatusPin = pin.open(3, 'input');
+var pin = new Pin(config);
+garageStatusPin = pin.open(3, 'input');
 
 //set up garage
 var garage = new Garage({

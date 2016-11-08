@@ -26,6 +26,9 @@ function PinPi(pin, usage) {
             gpio.write(pin, value, function (err) {
                 fn(err);
             });
+        },
+        close: function () {
+            gpio.close(pin);
         }
     };
 }
@@ -37,6 +40,8 @@ function PinEmulated(pin, usage) {
         },
         write: function (value, fn) {
             fn();
+        },
+        close: function () {
         }
     };
 }
