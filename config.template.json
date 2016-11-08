@@ -1,0 +1,17 @@
+﻿{
+    "name": "Chef",
+    "version": "1.0.0",
+    "port": 1337,
+	"telegramToken": "your-token",
+    "users": [
+        {
+            "id": 12345,
+            "chatId": 12345,
+            "firstName": "Admin",
+            "phoneNumber": "12345",
+            "isEnabled": true,
+            "isAdmin": true
+        }
+    ],
+	"isGPIO": false
+}
