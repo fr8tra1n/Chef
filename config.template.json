@@ -2,7 +2,7 @@
     "name": "Chef",
     "version": "1.0.0",
     "port": 1337,
-	"telegramToken": "your-token",
+    "telegramToken": "your-token",
     "users": [
         {
             "id": 12345,
@@ -13,5 +13,5 @@
             "isAdmin": true
         }
     ],
-	"isGPIO": false
+    "isGPIO": false
 }

@@ -3,23 +3,54 @@
 var Pin = function (config) {
     config = config || {};
     return {
-        open: function (pin, usage) {
-            return config.isGPIO ? new PinPi(pin, usage) : new PinEmulated(pin, usage);
+        open: function (pinConfig) {
+            if (pinConfig.pin === undefined ||
+                (pinConfig.input === undefined &&
+                    pinConfig.output === undefined)) {
+                console.log(pinConfig);
+                throw 'Invalid pin configuration';
+            }
+            return config.isGPIO ? new PinRpio(pinConfig) : new PinEmulated(pinConfig);
         }
     };
 };
 
-function PinPi(pin, usage) {
+function PinRpio(pinConfig) {
     var rpio = require("rpio"),
-        option = usage === 'input' ? rpio.INPUT :
-            usage === 'output' ? rpio.INPUT :
-                rpio.INPUT;
+        pin = pinConfig.pin;
 
-    rpio.open(pin, option);
+    //setup pin
+    if (pinConfig.input) {
+        if (pinConfig.pullDown) {
+            rpio.open(pin, rpio.INPUT, rpio.PULL_DOWN);
+        }
+        else if (pinConfig.pullUp) {
+            rpio.open(pin, rpio.INPUT, rpio.PULL_UP);
+        }
+        else {
+            rpio.open(pin, rpio.INPUT);
+        }
+    }
+    else if (pinConfig.output) {
+        if (pinConfig.pullDown) {
+            rpio.open(pin, rpio.OUTPUT, rpio.PULL_DOWN);
+        }
+        else if (pinConfig.pullUp) {
+            rpio.open(pin, rpio.OUTPUT, rpio.PULL_UP);
+        }
+        else {
+            rpio.open(pin, rpio.OUTPUT);
+        }
+    }
 
     return {
+        poll: function (onChange) {
+            rpio.poll(pin, function () {
+                onChange(rpio.read(pin));
+            });
+        },
         read: function () {
-            return rpio.read(pin) === rpio.HIGH;
+            return rpio.read(pin);
         },
         write: function (value) {
             rpio.write(pin, value ? rpio.HIGH : rpio.LOW);
@@ -30,8 +61,10 @@ function PinPi(pin, usage) {
     };
 }
 
-function PinEmulated(pin, usage) {
+function PinEmulated(pinConfig) {
     return {
+        poll: function (onChange) {
+        },
         read: function () {
         },
         write: function (value) {

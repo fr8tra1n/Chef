@@ -3,7 +3,6 @@
 var Garage = function (config) {
     var isGarageOpen = undefined,
         isInitial = true,
-        openCycles = 0,
         garageOpened = undefined,
         statusPin = config.statusPin,
         onOpen = config.onOpen,
@@ -28,46 +27,39 @@ var Garage = function (config) {
         //todo
     }
 
-    function update() {
-        isGarageOpen = !statusPin.read();
+    function update(value) {
         //console.log('garage status: ' + value);
+        isGarageOpen = !value;
         if (isGarageOpen) {
-            openCycles++;
             if (!garageOpened) {
                 //opened just now
                 garageOpened = reminded = new Date();
-                openCycles = 0;
-            }
-            else {
-                if (openCycles === 1 && onOpen) {
-                    //compensate short surge induced false positive
+                if (onOpen) {
                     onOpen(isInitial);
-                    isInitial = false;
                 }
-                if (onOpenReminder) {
-                    //already open
-                    if (new Date() - reminded > reminderInterval) {
-                        onOpenReminder(garageOpened);
-                        reminded = new Date();
-                    }
-                }
+                isInitial = false;
+            }
+            else if (onOpenReminder && (new Date() - reminded) > reminderInterval) {
+                //already open
+                onOpenReminder(garageOpened);
+                reminded = new Date();
             }
         }
-        else if (garageOpened && onClose) {
+        else if (garageOpened) {
             //closed just now
-            onClose();
+            garageOpened = undefined;
+            if (onClose) {
+                onClose();
+            }
         }
     }
 
     function start() {
-        var isBusy = false;
-        setInterval(function () {
-            if (!isBusy) {
-                isBusy = true;
-                update();
-                isBusy = false;
-            }
-        }, 150);
+        statusPin.poll(update);
+    }
+
+    function stop() {
+        statusPin.poll(null);
     }
 
     //constructor
@@ -79,7 +71,9 @@ var Garage = function (config) {
         open: open,
         close: close,
         isOpen: isOpen,
-        opened: opened
+        opened: opened,
+        start: start,
+        stop: stop
     };
 };
 

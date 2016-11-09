@@ -45,7 +45,7 @@ broadcast.message('Vurt da Furk! Bork Bork Bork');
 
 //setup gpio
 var pin = new Pin(config);
-garageStatusPin = pin.open(3, 'input');
+garageStatusPin = pin.open({ pin: 11, input: true, pullDown: true });
 
 //set up garage
 var garage = new Garage({
