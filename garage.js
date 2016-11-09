@@ -55,6 +55,9 @@ var Garage = function (config) {
     }
 
     function start() {
+        isInitial = true;
+        garageOpened = reminded = undefined;
+        update(statusPin.read());
         statusPin.poll(update);
     }
 
