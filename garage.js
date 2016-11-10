@@ -3,6 +3,7 @@
 var Garage = function (config) {
     var isGarageOpen = undefined,
         isInitial = true,
+        startHandle = undefined,
         garageOpened = undefined,
         statusPin = config.statusPin,
         statusOpenMatch = config.statusOpenMatch,
@@ -38,7 +39,6 @@ var Garage = function (config) {
                 if (onOpen) {
                     onOpen(isInitial);
                 }
-                isInitial = false;
             }
             else if (onOpenReminder && (new Date() - reminded) > reminderInterval) {
                 //already open
@@ -56,14 +56,25 @@ var Garage = function (config) {
     }
 
     function start() {
+        //reset and perform initial update
         isInitial = true;
         garageOpened = reminded = undefined;
         update(statusPin.read());
-        statusPin.poll(update);
+        isInitial = false;
+
+        //poll loop
+        var isBusy = false;
+        startHandle = setInterval(function () {
+            if (!isBusy) {
+                isBusy = true;
+                update(statusPin.read());
+                isBusy = false;
+            }
+        }, 250);
     }
 
     function stop() {
-        statusPin.poll(null);
+        clearInterval(startHandle);
     }
 
     //constructor
