@@ -45,8 +45,14 @@ function PinRpio(pinConfig) {
 
     return {
         poll: function (onChange) {
+            var lastValue = undefined;
             rpio.poll(pin, function () {
-                onChange(rpio.read(pin));
+                //ignore consecutive duplicates
+                var value = rpio.read();
+                if (value !== lastValue) {
+                    lastValue = value;
+                    onChange(value);
+                }
             });
         },
         read: function () {

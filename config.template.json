@@ -16,7 +16,7 @@
     "isGPIO": true,
     "garage": {
         "statusPin": {
-            "pin": 3,
+            "pin": 5,
             "input": true,
             "pullUp": true
         },
