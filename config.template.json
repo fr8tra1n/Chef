@@ -13,5 +13,13 @@
             "isAdmin": true
         }
     ],
-    "isGPIO": false
+    "isGPIO": true,
+    "garage": {
+        "statusPin": {
+            "pin": 11,
+            "input": true,
+            "pullUp": true
+        },
+        "statusOpenMatch": true
+    }
 }

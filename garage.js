@@ -5,6 +5,7 @@ var Garage = function (config) {
         isInitial = true,
         garageOpened = undefined,
         statusPin = config.statusPin,
+        statusOpenMatch = config.statusOpenMatch,
         onOpen = config.onOpen,
         onClose = config.onClose,
         onOpenReminder = config.onOpenReminder,
@@ -29,7 +30,7 @@ var Garage = function (config) {
 
     function update(value) {
         //console.log('garage status: ' + value);
-        isGarageOpen = !value;
+        isGarageOpen = (!!value) === statusOpenMatch;
         if (isGarageOpen) {
             if (!garageOpened) {
                 //opened just now

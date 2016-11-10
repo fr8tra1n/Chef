@@ -9,13 +9,15 @@ var http = require('http'),
     Security = require('./security.js'),
     Broadcast = require('./broadcast.js');
 
-var garageStatusPin;
+var garageStatusPin,
+    security = new Security(config);
 
 //setup exit handler
 function exitHandler(options, err) {
     //clean up
     if (garageStatusPin) {
         garageStatusPin.close();
+        console.log('gpio closed');
     }
 
     if (options.cleanup) console.log('clean');
@@ -29,27 +31,40 @@ process.on('SIGINT', exitHandler.bind(null, { exit: true }));
 //catches uncaught exceptions
 process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
-//init
+//setup gpio
+var pin = new Pin(config);
+garageStatusPin = pin.open(config.garage.statusPin);
+console.log('gpio setup');
+
+//webserver
 var port = process.env.port || config.port || 1337;
 http.createServer(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end(config.name + ' ' + config.version);
 }).listen(port);
+console.log('webserver listening at %d', port);
 
+//setup bot
 var bot = new TelegramBot(config.telegramToken, { polling: true }),
-    security = new Security(config),
     broadcast = new Broadcast(security, bot);
-
-//hello
+bot.onText(/\/garage/, function (msg, match) {
+    //console.log(msg);
+    if (security.isAllowed(msg.from.id)) {
+        if (garage.isOpen()) {
+            bot.sendMessage(msg.from.id, 'The garage was opened ' + pretty.format(garage.opened()));
+        }
+        else {
+            bot.sendMessage(msg.from.id, 'The garage is closed');
+        }
+    }
+});
 broadcast.message('Vurt da Furk! Bork Bork Bork');
-
-//setup gpio
-var pin = new Pin(config);
-garageStatusPin = pin.open({ pin: 11, input: true, pullDown: true });
+console.log('bot listening');
 
 //set up garage
 var garage = new Garage({
     statusPin: garageStatusPin,
+    statusOpenMatch: config.garage.statusOpenMatch,
     onOpen: function (isInitial) {
         if (isInitial) {
             broadcast.message('The garage is open');
@@ -65,16 +80,6 @@ var garage = new Garage({
         broadcast.message('The garage is closed');
     }
 });
+console.log('garage listening');
 
-//setup bot messages
-bot.onText(/\/garage/, function (msg, match) {
-    //console.log(msg);
-    if (security.isAllowed(msg.from.id)) {
-        if (garage.isOpen()) {
-            bot.sendMessage(msg.from.id, 'The garage was opened ' + pretty.format(garage.opened()));
-        }
-        else {
-            bot.sendMessage(msg.from.id, 'The garage is closed');
-        }
-    }
-});
+console.log('ready');
