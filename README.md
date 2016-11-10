@@ -7,5 +7,5 @@
 ...does not run in the cloud, although it could.  
 ...listens to and integrates with other systems (lights, doorbell, thermostat, proximity, sniffing, security, etc.).  
 ...is controlled by **telegram bot**, website or **Apple homekit**.  
-...runs at my home 24/7   
+...runs at my Raspberry PI 24/7   
 ...is under construction
