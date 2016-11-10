@@ -30,7 +30,7 @@ var Garage = function (config) {
 
     function update(value) {
         //console.log('garage status: ' + value);
-        isGarageOpen = (!!value) === statusOpenMatch;
+        isGarageOpen = value == statusOpenMatch;
         if (isGarageOpen) {
             if (!garageOpened) {
                 //opened just now

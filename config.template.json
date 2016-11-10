@@ -16,10 +16,10 @@
     "isGPIO": true,
     "garage": {
         "statusPin": {
-            "pin": 11,
+            "pin": 3,
             "input": true,
             "pullUp": true
         },
-        "statusOpenMatch": true
+        "statusOpenMatch": 1
     }
 }
