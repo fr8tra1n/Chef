@@ -1,7 +1,13 @@
 ﻿'use strict';
 
-var Garage = function (config) {
-    var isGarageOpen = undefined,
+const EventEmitter = require('events');
+const inherits = require('util').inherits;
+
+const Garage = function (config) {
+    EventEmitter.call(this);
+
+    var self = this,
+        isGarageOpen = undefined,
         isOperating = false,
         operationQueue = 0,
         isPositioning = false,
@@ -11,11 +17,6 @@ var Garage = function (config) {
         startHandle = undefined,
         garageOpened = undefined,
         reminded = undefined,
-        //events
-        onOpen = config.onOpen,
-        onClose = config.onClose,
-        onCloseAction = config.onCloseAction,
-        onOpenReminder = config.onOpenReminder,
         //config settings
         statusPin = config.statusPin,
         statusOpenMatch = config.statusOpenMatch,
@@ -25,7 +26,7 @@ var Garage = function (config) {
         openCloseDuration = config.openCloseDuration,
         operateTimeout = config.operateTimeout || 2000,
         operatePulseDuration = config.operatePulseDuration || 200,
-        operatePulseSleep = config.operatePulseSleep;
+        operatePulseSleep = config.operatePulseSleep || 100;
 
     function isOpen() {
         return isGarageOpen;
@@ -63,6 +64,7 @@ var Garage = function (config) {
                     //halted or opened
                     positioned = new Date();
                     operate();
+                    self.emit('action', 'Still trying to close the door');
                 }
             }
         }, statusInterval);
@@ -99,22 +101,18 @@ var Garage = function (config) {
             if (!garageOpened) {
                 //opened just now
                 garageOpened = reminded = new Date();
-                if (onOpen) {
-                    onOpen(isInitial);
-                }
+                self.emit('open', isInitial);
             }
-            else if (onOpenReminder && (new Date() - reminded) > reminderInterval) {
+            else if (new Date() - reminded > reminderInterval) {
                 //already open
-                onOpenReminder(garageOpened);
+                self.emit('openReminder', garageOpened);
                 reminded = new Date();
             }
         }
         else if (garageOpened) {
             //closed just now
             garageOpened = undefined;
-            if (onClose) {
-                onClose();
-            }
+            self.emit('close');
         }
     }
 
@@ -152,6 +150,7 @@ var Garage = function (config) {
     })();
 
     return {
+        on: self.on,
         open: open,
         close: close,
         isOpen: isOpen,
@@ -162,5 +161,7 @@ var Garage = function (config) {
         reset: reset
     };
 };
+
+inherits(Garage, EventEmitter);
 
 module.exports = Garage;

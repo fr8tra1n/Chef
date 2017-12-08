@@ -1,14 +1,15 @@
 ﻿'use strict';
 
-var http = require('http'),
+const http = require('http'),
     Pin = require('./pin.js'),
     Garage = require('./garage.js'),
     TelegramBot = require('node-telegram-bot-api'),
     pretty = require('pretty-date'),
     config = require('./config.json'),
     Security = require('./security.js'),
-    Broadcast = require('./broadcast.js');
-const fs = require('fs');
+    Broadcast = require('./broadcast.js'),
+    fs = require('fs');
+
 //const sound = require('./sound.js')({ player: config.player });
 //const dingSound = './media/ding.mp3';
 
@@ -50,19 +51,9 @@ console.log('x to play');
 return;
 */
 
-var garageStatusPin,
-    garageOperatePin,
-    security = new Security(config);
-
 //setup exit handler
 function exitHandler(options, err) {
-    //clean up
-    if (garageStatusPin) {
-        garageStatusPin.close();
-        console.log('gpio closed');
-    }
-
-    if (options.cleanup) console.log('clean');
+    pin.cleanup();
     if (err) console.log(err.stack);
     if (options.exit) process.exit();
 }
@@ -73,24 +64,27 @@ process.on('SIGINT', exitHandler.bind(null, { exit: true }));
 //catches uncaught exceptions
 process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
+const security = new Security(config);
+
 //setup gpio
-var pin = new Pin(config);
-garageStatusPin = pin.open(config.garage.statusPin);
-garageOperatePin = pin.open(config.garage.operatePin);
+const pin = new Pin(config.rpio),
+    garageStatusPin = pin.open(config.garage.statusPin),
+    garageOperatePin = pin.open(config.garage.operatePin);
 console.log('gpio setup');
 
 //webserver
-var port = process.env.port || config.port || 1337;
-http.createServer(function (req, res) {
+const port = process.env.port || config.port || 1337;
+const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(config.name + ' ' + config.version);
-}).listen(port);
-console.log('webserver listening at %d', port);
+    res.end(`${config.name} ${config.version}`);
+}).listen(port, () => {
+    console.log(`server running at port ${port}`);
+});
 
 //setup bot
-var bot = new TelegramBot(config.telegramToken, { polling: true }),
+const bot = new TelegramBot(config.telegramToken, { polling: true }),
     broadcast = new Broadcast(security, bot);
-bot.onText(/\/garage/, function (msg, match) {
+bot.onText(/\/garage/, (msg, match) => {
     //console.log(msg);
     if (security.isAllowed(msg.from.id)) {
         if (garage.isOpen()) {
@@ -101,7 +95,7 @@ bot.onText(/\/garage/, function (msg, match) {
         }
     }
 });
-bot.onText(/\/close.garage/, function (msg, match) {
+bot.onText(/\/close/, (msg, match) => {
     if (security.isAllowed(msg.from.id)) {
         if (garage.close()) {
             bot.sendMessage(msg.from.id, 'Closing now...');
@@ -111,7 +105,7 @@ bot.onText(/\/close.garage/, function (msg, match) {
         }
     }
 });
-bot.onText(/\/operate.garage/, function (msg, match) {
+bot.onText(/\/operate/, (msg, match) => {
     if (security.isAllowed(msg.from.id)) {
         if (garage.operate()) {
             bot.sendMessage(msg.from.id, 'Operating now...');
@@ -125,24 +119,33 @@ broadcast.message('Vurt da Furk! Bork Bork Bork');
 console.log('bot listening');
 
 //set up garage
-var garage = new Garage({
+const garage = new Garage({
     statusPin: garageStatusPin,
     statusOpenMatch: config.garage.statusOpenMatch,
     operatePin: garageOperatePin,
-    onOpen: function (isInitial) {
-        if (isInitial) {
-            broadcast.message('The garage is open');
-        }
-        else {
-            broadcast.message('The garage is opening');
-        }
-    },
-    onOpenReminder: function (opened) {
-        broadcast.message('The garage was opened ' + pretty.format(opened));
-    },
-    onClose: function () {
-        broadcast.message('The garage is closed');
+    statusInterval: config.garage.statusInterval,
+    reminderInterval: config.garage.reminderInterval,
+    openCloseDuration: config.garage.openCloseDuration,
+    operateTimeout: config.garage.operateTimeout,
+    operatePulseDuration: config.garage.operatePulseDuration,
+    operatePulseSleep: config.garage.operatePulseSleep
+});
+garage.on('open', (isInitial) => {
+    if (isInitial) {
+        broadcast.message('The garage is open');
     }
+    else {
+        broadcast.message('The garage is opening');
+    }
+});
+garage.on('openReminder', (opened) => {
+    broadcast.message('The garage was opened ' + pretty.format(opened));
+});
+garage.on('action', (message) => {
+    broadcast.message(message);
+});
+garage.on('close', () => {
+    broadcast.message('The garage is closed');
 });
 console.log('garage listening');
 

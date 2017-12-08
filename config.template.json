@@ -13,7 +13,11 @@
             "isAdmin": true
         }
     ],
-    "isGPIO": true,
+    "rpio": {
+        "gpiomem": true,
+        "mapping": "physical",
+        "mock": undefined
+    },
     "garage": {
         "statusPin": {
             "pin": 5,
@@ -23,7 +27,7 @@
         "operatePin": {
             "pin": 7,
             "output": true,
-            "initial":  true
+            "initial": false
         },
         "statusOpenMatch": 1,
         "statusInterval": 250,
@@ -33,5 +37,5 @@
         "operatePulseDuration": 200,
         "operatePulseSleep": 100
     },
-    "player":  "omxplayer"
+    "player": "omxplayer"
 }

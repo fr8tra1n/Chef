@@ -1,7 +1,15 @@
 ﻿'use strict';
 
-var Pin = function (config) {
+var rpio;
+
+const Pin = function (config) {
     config = config || {};
+
+    if (!config.mock) {
+        rpio = require('rpio');
+        rpio.init(config);
+    }
+
     return {
         open: function (pinConfig) {
             if (pinConfig.pin === undefined ||
@@ -11,13 +19,18 @@ var Pin = function (config) {
                 throw 'Invalid pin configuration';
             }
             return config.isGPIO ? new PinRpio(pinConfig) : new PinEmulated(pinConfig);
+        },
+        cleanup: function () {
+            if (rpio) {
+                rpio.cleanup();
+                console.log('cleaned rpio')
+            }
         }
     };
 };
 
 function PinRpio(pinConfig) {
-    var rpio = require("rpio"),
-        pin = pinConfig.pin;
+    var pin = pinConfig.pin;
 
     //setup pin
     if (pinConfig.input) {
@@ -39,7 +52,7 @@ function PinRpio(pinConfig) {
             rpio.open(pin, rpio.OUTPUT, rpio.LOW);
         }
         else {
-            rpio.open(pin, rpio.OUTPUT);
+            throw 'Output pinconfig must define an initial value';
         }
     }
 
