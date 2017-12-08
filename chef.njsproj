@@ -37,6 +37,7 @@
     <Compile Include="pin.js" />
     <Compile Include="security.js" />
     <Compile Include="server.js" />
+    <Compile Include="sound.js" />
     <Content Include="config.template.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />

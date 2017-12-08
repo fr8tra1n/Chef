@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "chef", ".\chef.njsproj", "{32CA87F9-BE48-4EFE-A4FC-17103A25D42C}"
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "chef", "chef.njsproj", "{32CA87F9-BE48-4EFE-A4FC-17103A25D42C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D1C5A4F1-34C1-4B5D-A514-B7F572FDE6B9}
 	EndGlobalSection
 EndGlobal

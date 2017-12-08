@@ -8,8 +8,50 @@ var http = require('http'),
     config = require('./config.json'),
     Security = require('./security.js'),
     Broadcast = require('./broadcast.js');
+const fs = require('fs');
+//const sound = require('./sound.js')({ player: config.player });
+//const dingSound = './media/ding.mp3';
+
+/*
+ * ding sound on X
+ * 
+process.stdin.setEncoding('utf8');
+process.stdin.on('readable', () => {
+    var chunk = process.stdin.read();
+    if (chunk !== null) {
+        process.stdout.write(`data: ${chunk}`);
+        if (chunk.trim() === 'x') {
+            sound.play(dingSound);
+            setTimeout(() => {
+                sound.play(dingSound);
+            }, 100);
+        }
+    }
+});
+process.stdin.on('end', () => {
+    process.stdout.write('end');
+});
+*/
+
+/*
+ * play telegram audio
+ * 
+var bot = new TelegramBot(config.telegramToken, { polling: true });
+//bot.sendAudio(config.users[0].chatId, fs.createReadStream('./media/ding.mp3'));
+bot.on('voice', (msg) => {
+    console.log(msg);
+    console.log(`download voice '${msg.voice.file_id}'`);
+    bot.downloadFile(msg.voice.file_id, './media/voice/').then((filename) => {
+        console.log(`saved voice to '${filename}'`);
+        sound.play(filename);
+    });
+});
+console.log('x to play');
+return;
+*/
 
 var garageStatusPin,
+    garageOperatePin,
     security = new Security(config);
 
 //setup exit handler
@@ -34,6 +76,7 @@ process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 //setup gpio
 var pin = new Pin(config);
 garageStatusPin = pin.open(config.garage.statusPin);
+garageOperatePin = pin.open(config.garage.operatePin);
 console.log('gpio setup');
 
 //webserver
@@ -58,6 +101,26 @@ bot.onText(/\/garage/, function (msg, match) {
         }
     }
 });
+bot.onText(/\/close.garage/, function (msg, match) {
+    if (security.isAllowed(msg.from.id)) {
+        if (garage.close()) {
+            bot.sendMessage(msg.from.id, 'Closing now...');
+        }
+        else {
+            bot.sendMessage(msg.from.id, 'Garage is already closed');
+        }
+    }
+});
+bot.onText(/\/operate.garage/, function (msg, match) {
+    if (security.isAllowed(msg.from.id)) {
+        if (garage.operate()) {
+            bot.sendMessage(msg.from.id, 'Operating now...');
+        }
+        else {
+            bot.sendMessage(msg.from.id, 'Garage is already operating');
+        }
+    }
+});
 broadcast.message('Vurt da Furk! Bork Bork Bork');
 console.log('bot listening');
 
@@ -65,6 +128,7 @@ console.log('bot listening');
 var garage = new Garage({
     statusPin: garageStatusPin,
     statusOpenMatch: config.garage.statusOpenMatch,
+    operatePin: garageOperatePin,
     onOpen: function (isInitial) {
         if (isInitial) {
             broadcast.message('The garage is open');

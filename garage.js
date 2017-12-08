@@ -2,16 +2,30 @@
 
 var Garage = function (config) {
     var isGarageOpen = undefined,
+        isOperating = false,
+        operationQueue = 0,
+        isPositioning = false,
+        positioned = undefined,
+        positionHandle = undefined,
         isInitial = true,
         startHandle = undefined,
         garageOpened = undefined,
-        statusPin = config.statusPin,
-        statusOpenMatch = config.statusOpenMatch,
+        reminded = undefined,
+        //events
         onOpen = config.onOpen,
         onClose = config.onClose,
+        onCloseAction = config.onCloseAction,
         onOpenReminder = config.onOpenReminder,
+        //config settings
+        statusPin = config.statusPin,
+        statusOpenMatch = config.statusOpenMatch,
+        operatePin = config.operatePin,
+        statusInterval = config.statusInterval || 250,
         reminderInterval = config.reminderInterval || 60000,
-        reminded = undefined;
+        openCloseDuration = config.openCloseDuration,
+        operateTimeout = config.operateTimeout || 2000,
+        operatePulseDuration = config.operatePulseDuration || 200,
+        operatePulseSleep = config.operatePulseSleep;
 
     function isOpen() {
         return isGarageOpen;
@@ -22,11 +36,60 @@ var Garage = function (config) {
     }
 
     function open() {
-        //todo
     }
 
     function close() {
-        //todo
+        if (isPositioning || !isGarageOpen) {
+            return false;
+        }
+        isPositioning = true;
+        //door is     : opened,  opening, closing, halted
+        //door will be: closing, halted,  halted,  opening/closing
+        operate();
+
+        positioned = new Date();
+        var isOpening = false,
+            isClosing = true;
+        positionHandle = setInterval(() => {
+            //done yet?
+            if (!isGarageOpen || !isPositioning) {
+                isPositioning = false;
+                clearInterval(positionHandle);
+                return;
+            }
+
+            if (isClosing) {
+                if (new Date() - positioned > openCloseDuration + operateTimeout) {
+                    //halted or opened
+                    positioned = new Date();
+                    operate();
+                }
+            }
+        }, statusInterval);
+        return true;
+    }
+
+    function operate() {
+        operationQueue++;
+        if (isOperating) {
+            return false;
+        }
+        isOperating = true;
+
+        operatePin.write(true);
+        setTimeout(() => {
+            operatePin.write(false);
+            setTimeout(() => {
+                if (--operationQueue > 0) {
+                    operationQueue--;
+                    operate();
+                }
+                else {
+                    isOperating = false;
+                }
+            }, operatePulseSleep);
+        }, operatePulseDuration);
+        return true;
     }
 
     function update(value) {
@@ -70,11 +133,17 @@ var Garage = function (config) {
                 update(statusPin.read());
                 isBusy = false;
             }
-        }, 250);
+        }, statusInterval);
     }
 
     function stop() {
         clearInterval(startHandle);
+    }
+
+    function reset() {
+        isOperating = false;
+        isPositioning = false;
+        operationQueue = 0;
     }
 
     //constructor
@@ -87,8 +156,10 @@ var Garage = function (config) {
         close: close,
         isOpen: isOpen,
         opened: opened,
+        stop: stop,
         start: start,
-        stop: stop
+        operate: operate,
+        reset: reset
     };
 };
 

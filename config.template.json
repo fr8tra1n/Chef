@@ -1,6 +1,6 @@
 ﻿{
     "name": "Chef",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "port": 1337,
     "telegramToken": "your-token",
     "users": [
@@ -20,6 +20,17 @@
             "input": true,
             "pullUp": true
         },
-        "statusOpenMatch": 1
-    }
+        "operatePin": {
+            "pin": 7,
+            "output": true
+        },
+        "statusOpenMatch": 1,
+        "statusInterval": 250,
+        "reminderInterval": 90000,
+        "openCloseDuration": 10000,
+        "operateTimeout": 2000,
+        "operatePulseDuration": 200,
+        "operatePulseSleep": 100
+    },
+    "player":  "omxplayer"
 }
