@@ -1,172 +1,157 @@
 ﻿'use strict';
 
 const EventEmitter = require('events');
-const inherits = require('util').inherits;
 
-const Garage = function (config) {
-    EventEmitter.call(this);
+class Garage extends EventEmitter {
+    constructor(config) {
+        super();
 
-    var self = this,
-        isGarageOpen = undefined,
-        isOperating = false,
-        operationQueue = 0,
-        isPositioning = false,
-        positioned = undefined,
-        positionHandle = undefined,
-        isInitial = true,
-        startHandle = undefined,
-        garageOpened = undefined,
-        reminded = undefined,
+        this.isGarageOpen = undefined;
+        this.isOperating = false;
+        this.operationQueue = 0;
+        this.isPositioning = false;
+        this.positionHandle = undefined;
+        this.isInitial = true;
+        this.startHandle = undefined;
+        this.garageOpened = undefined;
+        this.reminded = undefined;
+
         //config settings
-        statusPin = config.statusPin,
-        statusOpenMatch = config.statusOpenMatch,
-        operatePin = config.operatePin,
-        operateIdleValue = config.operateIdleValue,
-        statusInterval = config.statusInterval || 250,
-        reminderInterval = config.reminderInterval || 60000,
-        openCloseDuration = config.openCloseDuration,
-        operateTimeout = config.operateTimeout || 2000,
-        operatePulseDuration = config.operatePulseDuration || 200,
-        operatePulseSleep = config.operatePulseSleep || 100;
+        this.statusPin = config.statusPin;
+        this.statusOpenMatch = config.statusOpenMatch;
+        this.operatePin = config.operatePin;
+        this.operateIdleValue = config.operateIdleValue;
+        this.statusInterval = config.statusInterval || 250;
+        this.reminderInterval = config.reminderInterval || 60000;
+        this.openCloseDuration = config.openCloseDuration;
+        this.operateTimeout = config.operateTimeout || 2000;
+        this.operatePulseDuration = config.operatePulseDuration || 200;
+        this.operatePulseSleep = config.operatePulseSleep || 100;
 
-    if (operateIdleValue === undefined) {
-        throw 'Garage operateIdleValue must be defined';
+        if (this.operateIdleValue === undefined) {
+            throw 'Garage operateIdleValue must be defined';
+        }
+
+        this.start();
     }
 
-    function isOpen() {
-        return isGarageOpen;
+    get isOpen() {
+        return this.isGarageOpen;
     }
 
-    function opened() {
-        return garageOpened;
+    open() {
+        //todo: implement actual open strategy
+        this.operate();
     }
 
-    function open() {
-    }
-
-    function close() {
-        if (isPositioning || !isGarageOpen) {
+    close() {
+        if (this.isPositioning || !this.isOpen) {
             return false;
         }
-        isPositioning = true;
+        this.isPositioning = true;
         //door is     : opened,  opening, closing, halted
         //door will be: closing, halted,  halted,  opening/closing
-        operate();
+        this.operate();
 
-        positioned = new Date();
-        var isOpening = false,
-            isClosing = true;
-        positionHandle = setInterval(() => {
+        var positioned = new Date(),
+            isClosing = true,
+            tryCount = 0;
+        this.positionHandle = setInterval(() => {
             //done yet?
-            if (!isGarageOpen || !isPositioning) {
-                isPositioning = false;
-                clearInterval(positionHandle);
+            if (!this.isOpen || !this.isPositioning || tryCount > 3) {
+                this.isPositioning = false;
+                clearInterval(this.positionHandle);
+                if (tryCount > 3) {
+                    this.emit('action', 'I give up, the door won\'t close');
+                }
                 return;
             }
 
             if (isClosing) {
-                if (new Date() - positioned > openCloseDuration + operateTimeout) {
+                if (new Date() - positioned > this.openCloseDuration + this.operateTimeout) {
                     //halted or opened
                     positioned = new Date();
-                    operate();
-                    self.emit('action', 'Still trying to close the door');
+                    this.operate();
+                    this.emit('action', 'Still trying to close the door');
+                    tryCount++;
                 }
             }
-        }, statusInterval);
+        }, this.statusInterval);
         return true;
     }
 
-    function operate() {
-        operationQueue++;
-        if (isOperating) {
+    operate() {
+        this.operationQueue++;
+        if (this.isOperating) {
             return false;
         }
-        isOperating = true;
+        this.isOperating = true;
 
-        operatePin.write(!operateIdleValue);
+        this.operatePin.write(!this.operateIdleValue);
         setTimeout(() => {
-            operatePin.write(operateIdleValue);
+            this.operatePin.write(this.operateIdleValue);
             setTimeout(() => {
-                if (--operationQueue > 0) {
-                    operationQueue--;
-                    operate();
+                if (--this.operationQueue > 0) {
+                    this.operationQueue--;
+                    this.operate();
                 }
                 else {
-                    isOperating = false;
+                    this.isOperating = false;
                 }
-            }, operatePulseSleep);
-        }, operatePulseDuration);
+            }, this.operatePulseSleep);
+        }, this.operatePulseDuration);
         return true;
     }
 
-    function update(value) {
+    update(value) {
         //console.log('garage status: ' + value);
-        isGarageOpen = value == statusOpenMatch;
-        if (isGarageOpen) {
-            if (!garageOpened) {
+        this.isGarageOpen = value == this.statusOpenMatch;
+        if (this.isGarageOpen) {
+            if (!this.garageOpened) {
                 //opened just now
-                garageOpened = reminded = new Date();
-                self.emit('open', isInitial);
+                this.garageOpened = this.reminded = new Date();
+                this.emit('open', this.isInitial);
             }
-            else if (new Date() - reminded > reminderInterval) {
+            else if (new Date() - this.reminded > this.reminderInterval) {
                 //already open
-                self.emit('openReminder', garageOpened);
-                reminded = new Date();
+                this.emit('openReminder', this.garageOpened);
+                this.reminded = new Date();
             }
         }
-        else if (garageOpened) {
+        else if (this.garageOpened) {
             //closed just now
-            garageOpened = undefined;
-            self.emit('close');
+            this.garageOpened = undefined;
+            this.emit('close');
         }
     }
 
-    function start() {
+    start() {
         //reset and perform initial update
-        isInitial = true;
-        garageOpened = reminded = undefined;
-        update(statusPin.read());
-        isInitial = false;
+        this.isInitial = true;
+        this.garageOpened = this.reminded = undefined;
+        this.update(this.statusPin.read());
+        this.isInitial = false;
 
         //poll loop
         var isBusy = false;
-        startHandle = setInterval(function () {
+        this.startHandle = setInterval(() => {
             if (!isBusy) {
                 isBusy = true;
-                update(statusPin.read());
+                this.update(this.statusPin.read());
                 isBusy = false;
             }
-        }, statusInterval);
+        }, this.statusInterval);
     }
 
-    function stop() {
-        clearInterval(startHandle);
+    stop() {
+        clearInterval(this.startHandle);
     }
 
-    function reset() {
-        isOperating = false;
-        isPositioning = false;
-        operationQueue = 0;
+    reset() {
+        this.isOperating = false;
+        this.isPositioning = false;
+        this.operationQueue = 0;
     }
-
-    //constructor
-    (function () {
-        start();
-    })();
-
-    return {
-        on: self.on,
-        open: open,
-        close: close,
-        isOpen: isOpen,
-        opened: opened,
-        stop: stop,
-        start: start,
-        operate: operate,
-        reset: reset
-    };
-};
-
-inherits(Garage, EventEmitter);
+}
 
 module.exports = Garage;

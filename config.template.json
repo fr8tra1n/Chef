@@ -32,10 +32,11 @@
         "statusOpenMatch": 1,
         "statusInterval": 250,
         "reminderInterval": 90000,
-        "openCloseDuration": 10000,
+        "openCloseDuration": 22500,
+        "closeOpenDuration": 18000,
         "operateTimeout": 2000,
         "operatePulseDuration": 200,
-        "operatePulseSleep": 100
+        "operatePulseSleep": 250
     },
     "player": "omxplayer"
 }
