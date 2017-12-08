@@ -124,7 +124,7 @@ const garage = new Garage({
     statusPin: garageStatusPin,
     statusOpenMatch: config.garage.statusOpenMatch,
     operatePin: garageOperatePin,
-    operateValue: config.garage.operatePin.initial,
+    operateIdleValue: config.garage.operatePin.initial,
     statusInterval: config.garage.statusInterval,
     reminderInterval: config.garage.reminderInterval,
     openCloseDuration: config.garage.openCloseDuration,

@@ -21,7 +21,7 @@ const Garage = function (config) {
         statusPin = config.statusPin,
         statusOpenMatch = config.statusOpenMatch,
         operatePin = config.operatePin,
-        operateValue = config.operateValue,
+        operateIdleValue = config.operateIdleValue,
         statusInterval = config.statusInterval || 250,
         reminderInterval = config.reminderInterval || 60000,
         openCloseDuration = config.openCloseDuration,
@@ -83,9 +83,9 @@ const Garage = function (config) {
         }
         isOperating = true;
 
-        operatePin.write(operateValue);
+        operatePin.write(!operateIdleValue);
         setTimeout(() => {
-            operatePin.write(!operateValue);
+            operatePin.write(operateIdleValue);
             setTimeout(() => {
                 if (--operationQueue > 0) {
                     operationQueue--;
