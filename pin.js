@@ -19,12 +19,6 @@ const Pin = function (config) {
                 throw 'Invalid pin configuration';
             }
             return config.isGPIO ? new PinRpio(pinConfig) : new PinEmulated(pinConfig);
-        },
-        cleanup: function () {
-            if (rpio) {
-                rpio.cleanup();
-                console.log('cleaned rpio')
-            }
         }
     };
 };
@@ -75,7 +69,7 @@ function PinRpio(pinConfig) {
             rpio.write(pin, value ? rpio.HIGH : rpio.LOW);
         },
         close: function () {
-            rpio.close(pin);
+            rpio.close(pin, rpio.PIN_RESET);
         }
     };
 }

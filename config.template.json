@@ -16,7 +16,7 @@
     "rpio": {
         "gpiomem": true,
         "mapping": "physical",
-        "mock": undefined
+        "mock": null
     },
     "garage": {
         "statusPin": {

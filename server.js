@@ -53,7 +53,8 @@ return;
 
 //setup exit handler
 function exitHandler(options, err) {
-    pin.cleanup();
+    garageStatusPin.close();
+    garageOperatePin.close();
     if (err) console.log(err.stack);
     if (options.exit) process.exit();
 }
