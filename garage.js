@@ -21,12 +21,17 @@ const Garage = function (config) {
         statusPin = config.statusPin,
         statusOpenMatch = config.statusOpenMatch,
         operatePin = config.operatePin,
+        operateValue = config.operateValue,
         statusInterval = config.statusInterval || 250,
         reminderInterval = config.reminderInterval || 60000,
         openCloseDuration = config.openCloseDuration,
         operateTimeout = config.operateTimeout || 2000,
         operatePulseDuration = config.operatePulseDuration || 200,
         operatePulseSleep = config.operatePulseSleep || 100;
+
+    if (operateValue === undefined) {
+        throw 'Garage operatevalue must be defined';
+    }
 
     function isOpen() {
         return isGarageOpen;
@@ -78,9 +83,9 @@ const Garage = function (config) {
         }
         isOperating = true;
 
-        operatePin.write(true);
+        operatePin.write(operateValue);
         setTimeout(() => {
-            operatePin.write(false);
+            operatePin.write(!operateValue);
             setTimeout(() => {
                 if (--operationQueue > 0) {
                     operationQueue--;

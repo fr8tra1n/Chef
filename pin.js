@@ -18,7 +18,7 @@ const Pin = function (config) {
                 console.log(pinConfig);
                 throw 'Invalid pin configuration';
             }
-            return config.isGPIO ? new PinRpio(pinConfig) : new PinEmulated(pinConfig);
+            return !config.mock ? new PinRpio(pinConfig) : new PinEmulated(pinConfig);
         }
     };
 };
