@@ -29,8 +29,8 @@ const Garage = function (config) {
         operatePulseDuration = config.operatePulseDuration || 200,
         operatePulseSleep = config.operatePulseSleep || 100;
 
-    if (operateValue === undefined) {
-        throw 'Garage operatevalue must be defined';
+    if (operateIdleValue === undefined) {
+        throw 'Garage operateIdleValue must be defined';
     }
 
     function isOpen() {
