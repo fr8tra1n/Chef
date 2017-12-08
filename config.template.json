@@ -22,7 +22,8 @@
         },
         "operatePin": {
             "pin": 7,
-            "output": true
+            "output": true,
+            "initial":  true
         },
         "statusOpenMatch": 1,
         "statusInterval": 250,

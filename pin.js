@@ -32,11 +32,11 @@ function PinRpio(pinConfig) {
         }
     }
     else if (pinConfig.output) {
-        if (pinConfig.pullDown) {
-            rpio.open(pin, rpio.OUTPUT, rpio.PULL_DOWN);
+        if (pinConfig.initial === true) {
+            rpio.open(pin, rpio.OUTPUT, rpio.HIGH);
         }
-        else if (pinConfig.pullUp) {
-            rpio.open(pin, rpio.OUTPUT, rpio.PULL_UP);
+        else if (pinConfig.initial === false) {
+            rpio.open(pin, rpio.OUTPUT, rpio.LOW);
         }
         else {
             rpio.open(pin, rpio.OUTPUT);
