@@ -96,6 +96,12 @@ bot.onText(/\/garage/, (msg, match) => {
         }
     }
 });
+bot.onText(/\/open/, (msg, match) => {
+    if (security.isAllowed(msg.from.id)) {
+        garage.open();
+        bot.sendMessage(msg.from.id, 'Opening now...');
+    }
+});
 bot.onText(/\/close/, (msg, match) => {
     if (security.isAllowed(msg.from.id)) {
         if (garage.close()) {

@@ -45,7 +45,7 @@ class Garage extends EventEmitter {
 
     open() {
         //todo: implement actual open strategy
-        this.operate();
+        return this.operate();
     }
 
     close() {
