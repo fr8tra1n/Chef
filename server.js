@@ -88,8 +88,8 @@ const bot = new TelegramBot(config.telegramToken, { polling: true }),
 bot.onText(/\/garage/, (msg, match) => {
     //console.log(msg);
     if (security.isAllowed(msg.from.id)) {
-        if (garage.isOpen()) {
-            bot.sendMessage(msg.from.id, 'The garage was opened ' + pretty.format(garage.opened()));
+        if (garage.isOpen) {
+            bot.sendMessage(msg.from.id, 'The garage was opened ' + pretty.format(garage.opened));
         }
         else {
             bot.sendMessage(msg.from.id, 'The garage is closed');

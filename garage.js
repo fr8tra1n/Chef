@@ -39,6 +39,10 @@ class Garage extends EventEmitter {
         return this.isGarageOpen;
     }
 
+    get opened() {
+        return this.garageOpened;
+    }
+
     open() {
         //todo: implement actual open strategy
         this.operate();
