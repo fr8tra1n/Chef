@@ -10,6 +10,8 @@ const http = require('http'),
     Broadcast = require('./broadcast.js'),
     fs = require('fs');
 
+//install mdns: npm config set unsafe-perm true
+
 //const sound = require('./sound.js')({ player: config.player });
 //const dingSound = './media/ding.mp3';
 
