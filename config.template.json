@@ -1,6 +1,6 @@
 ﻿{
     "name": "Chef",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "port": 1337,
     "telegramToken": "your-token",
     "users": [
@@ -37,6 +37,11 @@
         "operateTimeout": 2000,
         "operatePulseDuration": 200,
         "operatePulseSleep": 250
+    },
+    "garageHap": {
+        "port": 51826,
+        "username": "C1:5D:3F:EE:5E:FA",
+        "pincode": "123-45-678"
     },
     "player": "omxplayer"
 }

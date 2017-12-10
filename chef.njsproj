@@ -33,22 +33,79 @@
   <ItemGroup>
     <Compile Include="broadcast.js" />
     <Compile Include="config.json" />
+    <Compile Include="garage.hap.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="garage.js" />
+    <Compile Include="hap\accessories\AirConditioner_accessory.js" />
+    <Compile Include="hap\accessories\Fan_accessory.js" />
+    <Compile Include="hap\accessories\GarageDoorOpener_accessory.js" />
+    <Compile Include="hap\accessories\Light_accessory.js" />
+    <Compile Include="hap\accessories\Lock_accessory.js" />
+    <Compile Include="hap\accessories\MotionSensor_accessory.js" />
+    <Compile Include="hap\accessories\Outlet_accessory.js" />
+    <Compile Include="hap\accessories\TemperatureSensor_accessory.js" />
+    <Compile Include="hap\accessories\Thermostat_accessory.js" />
+    <Compile Include="hap\accessories\types.js" />
+    <Compile Include="hap\BridgedCore.js" />
+    <Compile Include="hap\CameraCore.js" />
+    <Compile Include="hap\Core.js" />
+    <Compile Include="hap\index.js" />
+    <Compile Include="hap\lib\Accessory.js" />
+    <Compile Include="hap\lib\AccessoryLoader.js" />
+    <Compile Include="hap\lib\Advertiser.js" />
+    <Compile Include="hap\lib\Bridge.js" />
+    <Compile Include="hap\lib\Camera.js" />
+    <Compile Include="hap\lib\camera\RTPProxy.js" />
+    <Compile Include="hap\lib\Characteristic.js" />
+    <Compile Include="hap\lib\gen\HomeKitTypes-Bridge.js" />
+    <Compile Include="hap\lib\gen\HomeKitTypes.js" />
+    <Compile Include="hap\lib\gen\import.js" />
+    <Compile Include="hap\lib\HAPServer.js" />
+    <Compile Include="hap\lib\model\AccessoryInfo.js" />
+    <Compile Include="hap\lib\model\IdentifierCache.js" />
+    <Compile Include="hap\lib\Service.js" />
+    <Compile Include="hap\lib\StreamController.js" />
+    <Compile Include="hap\lib\util\chacha20poly1305.js" />
+    <Compile Include="hap\lib\util\clone.js" />
+    <Compile Include="hap\lib\util\encryption.js" />
+    <Compile Include="hap\lib\util\eventedhttp.js" />
+    <Compile Include="hap\lib\util\hkdf.js" />
+    <Compile Include="hap\lib\util\once.js" />
+    <Compile Include="hap\lib\util\tlv.js" />
+    <Compile Include="hap\lib\util\uuid.js" />
     <Compile Include="pin.js" />
     <Compile Include="security.js" />
     <Compile Include="server.js" />
     <Compile Include="sound.js" />
     <Content Include="config.template.json" />
+    <Content Include="hap\.gitattributes" />
+    <Content Include="hap\.gitignore" />
+    <Content Include="hap\lib\res\snapshot.jpg" />
+    <Content Include="hap\LICENSE" />
+    <Content Include="hap\npm-debug.log" />
+    <Content Include="hap\package-lock.json" />
+    <Content Include="hap\package.json" />
+    <Content Include="hap\README.md" />
     <Content Include="package.json" />
     <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="hap\" />
+    <Folder Include="hap\accessories\" />
+    <Folder Include="hap\lib\" />
+    <Folder Include="hap\lib\camera\" />
+    <Folder Include="hap\lib\gen\" />
+    <Folder Include="hap\lib\model\" />
+    <Folder Include="hap\lib\res\" />
+    <Folder Include="hap\lib\util\" />
     <Folder Include="typings\" />
     <Folder Include="typings\globals\" />
     <Folder Include="typings\globals\node\" />
     <Folder Include="typings\globals\rpio\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="hap\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\node\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\rpio\index.d.ts" />
     <TypeScriptCompile Include="typings\index.d.ts" />

@@ -8,7 +8,9 @@ const http = require('http'),
     config = require('./config.json'),
     Security = require('./security.js'),
     Broadcast = require('./broadcast.js'),
-    fs = require('fs');
+    fs = require('fs'),
+    storage = require('node-persist'),
+    GarageHap = require('./garage.hap');
 
 //const sound = require('./sound.js')({ player: config.player });
 //const dingSound = './media/ding.mp3';
@@ -125,7 +127,8 @@ bot.onText(/\/operate/, (msg, match) => {
 broadcast.message('Vurt da Furk! Bork Bork Bork');
 console.log('bot listening');
 
-//set up garage
+//setup garage
+console.log('setup garage');
 const garage = new Garage({
     statusPin: garageStatusPin,
     statusOpenMatch: config.garage.statusOpenMatch,
@@ -155,6 +158,36 @@ garage.on('action', (message) => {
 garage.on('close', () => {
     broadcast.message('The garage is closed');
 });
-console.log('garage listening');
+console.log('garage ready');
 
-console.log('ready');
+//setup hap
+if (config.garageHap) {
+    console.log('setup garage-hap');
+    storage.initSync();
+    const garageHap = new GarageHap({
+        port: config.garageHap.port,
+        username: config.garageHap.username,
+        pincode: config.garageHap.pincode
+    });
+    garageHap.on('status', (state) => {
+        state.isClosed = !garage.isOpen;
+    });
+    garageHap.on('close', (state) => {
+        garage.close();
+    });
+    garage.on('open', (isInitial) => {
+        if (isInitial) {
+            garageHap.opened();
+        }
+        else {
+            garageHap.opening();
+        }
+    });
+    garage.on('close', () => {
+        garageHap.closed();
+    });
+    garageHap.start();
+    console.log('garage-hap ready');
+}
+
+console.log('chef ready');
